@@ -3,7 +3,7 @@
     <div flex="~ row gap2" items-center my2>
       <img src="/movies-sm.webp" width="25" height="25" alt="Logo">
       <div text-xl>
-        Nuxt Movies
+        wwwmovie
       </div>
     </div>
     <div flex="~ row gap2" items-center>

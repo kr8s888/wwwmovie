@@ -1,4 +1,4 @@
-# Nuxt Movies Proxy
+# wwwmovie Proxy
 
 Proxy hosts is a lightweight proxy server for the tmdb api and youtube images.
 

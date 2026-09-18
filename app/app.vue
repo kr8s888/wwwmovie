@@ -8,15 +8,14 @@ useHead(() => ({
     lang: locale.value,
   },
   charset: 'utf-8',
-  title: 'Nuxt Movies',
-  titleTemplate: title => (title !== 'Nuxt Movies' ? `${title} · Nuxt Movies` : title),
+  title: 'wwwmovie',
+  titleTemplate: title => (title !== 'wwwmovie' ? `${title} · wwwmovie` : title),
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-    { name: 'description', content: 'A TMDB client built with Nuxt Image to show the potential of it ✨' },
-    { property: 'og:image', content: 'https://movies.nuxt.space/social-card.png' },
+    { name: 'description', content: 'wwwmovie —— 基于 Nuxt 的电影浏览与按类型推荐站点，数据来自 TMDB。' },
+    // TODO: 部署后换成你自己的域名，例如 https://wwwmovie.vercel.app/social-card.png
+    { property: 'og:image', content: 'https://wwwmovie.vercel.app/social-card.png' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:site', content: '@nuxt_js' },
-    { name: 'twitter:creator', content: '@nuxt_js' },
   ],
   link: [
     {

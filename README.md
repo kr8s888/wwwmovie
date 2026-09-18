@@ -2,7 +2,7 @@
 <img height="100px" src="./public/movies.webp" alt="Movies logo" />
 </p>
 
-<h1 align="center">Movies · 电影浏览与按类型推荐</h1>
+<h1 align="center">wwwmovie · 电影浏览与按类型推荐</h1>
 <br>
 
 > 基于 [Nuxt](https://github.com/nuxt/nuxt) 的电影浏览网站，在 Nuxt 官方示例 [tastejs/nuxt-movies](https://github.com/tastejs/nuxt-movies)（MIT）基础上二次开发，数据来自 [The Movie Database (TMDB)](https://www.themoviedb.org) API。
@@ -68,7 +68,8 @@ pnpm build && pnpm start
 - 依赖从 `nuxt-nightly` 降到稳定版 Nuxt 4.5.2，并显式固定 `unhead` / `@unhead/vue` 3.3.2（修复 nightly 的 `precomputed` 数据缺失导致的 500，以及 unhead 版本漂移）
 - 新增 `scripts/fix-unhead-output.mjs`，在 `pnpm build` 后补齐 Nitro 打包遗漏的 unhead 文件
 - 数据源由上游代理切换为本地代理，`apiBaseUrl` 改为 `http://localhost:3001`
-- 中英文语言包补充推荐功能文案
+- 中英文语言包补充推荐功能文案；语言包精简为 en + zh-CN（其余 12 个已删除）
+- 站点名称品牌化为 wwwmovie（`app/app.vue` 标题与描述、页脚、proxy/server 文案、e2e 断言），并移除上游的 twitter 账号元信息
 - 目录结构整理、README 重写
 
 ## Credits & License

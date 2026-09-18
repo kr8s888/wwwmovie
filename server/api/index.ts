@@ -1,1 +1,1 @@
-export default defineEventHandler(() => 'Nuxt Movies API')
+export default defineEventHandler(() => 'wwwmovie API')
