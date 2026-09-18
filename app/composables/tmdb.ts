@@ -29,8 +29,10 @@ export function fetchTMDB(url: string, params: Record<string, string | number | 
   }
   const hash = ohash([url, requestParams])
   const state = useState<any>(hash, () => null)
+  // 必须始终返回 Promise：命中缓存时 state.value 是普通值，
+  // 直接 return 会让调用方的 .then() / await 在 hydration 后抛错
   if (state.value)
-    return state.value
+    return Promise.resolve(state.value)
   if (!promiseCache.has(hash)) {
     promiseCache.set(
       hash,

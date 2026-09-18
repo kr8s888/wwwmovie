@@ -67,5 +67,8 @@
   "Recommended for you": "Recommended for you",
   "Select 2-3 genres to get recommendations": "Select 2-3 genres to get personalized recommendations",
   "Start": "Start",
-  "No genres selected": "No genres selected"
+  "No genres selected": "No genres selected",
+  "Select at least 2 genres": "Select at least 2 genres",
+  "All selected genres must match": "Only titles matching all selected genres are shown",
+  "No results for these genres": "No titles match all the selected genres - try removing one"
 }

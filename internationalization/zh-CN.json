@@ -67,5 +67,8 @@
   "Recommended for you": "为你推荐",
   "Select 2-3 genres to get recommendations": "选择 2~3 个你喜欢的类型，为你生成推荐",
   "Start": "开始推荐",
-  "No genres selected": "还没有选择类型"
+  "No genres selected": "还没有选择类型",
+  "Select at least 2 genres": "请至少选择 2 个类型",
+  "All selected genres must match": "只推荐同时符合全部所选类型的影片",
+  "No results for these genres": "没有同时符合这些类型的影片，试着去掉一个类型"
 }

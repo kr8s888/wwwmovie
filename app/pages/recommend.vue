@@ -10,18 +10,20 @@ const type = computed(() => (route.query.type as MediaType) || 'movie')
 const genreList = await getGenreList(type.value)
 const genreNames = computed(() =>
   genres.value
-    .split('|')
+    .split(',')
     .map(id => genreList.find(g => g.id === +id)?.name)
     .filter(Boolean)
     .join(' · '),
 )
 
 const items: Media[] = reactive([])
+const fetched = ref(false)
 
 async function fetch(page: number) {
   if (!genres.value)
     return
   items.push(...(await getMediaByGenre(type.value, genres.value, page, 'vote_count.desc')).results)
+  fetched.value = true
 }
 </script>
 
@@ -38,5 +40,8 @@ async function fetch(page: number) {
     >
       {{ t('Recommended for you') }}：{{ genreNames }}
     </MediaAutoLoadGrid>
+    <p v-if="fetched && items.length === 0" p8 op60>
+      {{ t('No results for these genres') }}
+    </p>
   </div>
 </template>

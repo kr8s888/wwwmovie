@@ -26,7 +26,8 @@ function start() {
     return
   navigateTo({
     path: '/recommend',
-    query: { genres: selected.value.join('|'), type: 'movie' },
+    // 逗号分隔 = TMDB 的 AND 语义：推荐同时属于这些类型的影片
+    query: { genres: selected.value.join(','), type: 'movie' },
   })
 }
 </script>
@@ -59,12 +60,16 @@ function start() {
       </button>
     </div>
 
+    <p op50 mt8 text-sm>
+      {{ t('All selected genres must match') }}
+    </p>
+
     <button
-      mt8 w-full rounded-xl bg-primary p4 text-lg font-bold disabled:op30
+      mt3 w-full rounded-xl bg-primary p4 text-lg font-bold disabled:op30
       :disabled="selected.length < 2"
       @click="start"
     >
-      {{ t('Start') }} ({{ selected.length }}/3)
+      {{ selected.length < 2 ? t('Select at least 2 genres') : t('Start') }} ({{ selected.length }}/3)
     </button>
   </div>
 </template>
