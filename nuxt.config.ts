@@ -1,4 +1,4 @@
-const apiBaseUrl = 'http://localhost:3001'
+const apiBaseUrl = process.env.VITE_API_BASE_URL || ''
 // const apiBaseUrl = 'https://movies-proxy.vercel.app'
 
 export default defineNuxtConfig({

@@ -76,6 +76,27 @@ curl -s https://<代理域名>/tmdb/configuration | head -c 200
 { property: 'og:image', content: 'https://<你的前端域名>/social-card.png' },
 ```
 
+### 2.1 更推荐：用环境变量注入（无需改代码）
+
+代码已支持环境变量覆盖：
+
+```bash
+VITE_API_BASE_URL=https://<代理域名> pnpm build
+```
+
+- **Vercel 上**：在前端项目的 Environment Variables 里加 `VITE_API_BASE_URL = https://<代理域名>`（Production/Preview/Development 都勾），重新部署即可，仓库代码不用动。
+- **不设置该变量时**（默认）：服务端 SSR 直连 `http://localhost:3001`，浏览器端走**同源相对路径**（`/tmdb`、`/ipx`）——适合"本机 + 反向代理 / 内网穿透"的部署方式（同源，无跨域问题，公网域名变了也不用重新构建）。
+
+对应代码（`app/composables/tmdb.ts`）：
+
+```ts
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || (import.meta.server ? 'http://localhost:3001' : '')
+```
+
+`nuxt.config.ts` 里的图片 provider baseURL 同样由该变量驱动。
+
+**2.2 老办法：直接改常量**（同样可用，适合只想一次性写死域名的情况）
+
 > **为什么必须改代码，而不能用环境变量？**
 > 这两处常量分别被 `fetchTMDB()` 的 `baseURL`（`${apiBaseUrl}/tmdb`）和 Nuxt Image 的 `proxy` provider（`${apiBaseUrl}/ipx`）使用，两者都在构建时写入产物。
 > `nuxt.config.ts` 里虽然有一个 `runtimeConfig.public.apiBaseUrl`，但**前端代码里没有任何地方消费它**（没有 `useRuntimeConfig()` 调用），所以设置 `NUXT_PUBLIC_API_BASE_URL` 不会生效。
