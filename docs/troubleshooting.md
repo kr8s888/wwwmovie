@@ -208,6 +208,66 @@ curl -s "https://doh.pub/dns-query?name=api.themoviedb.org&type=A"
 
 **适用范围**：仅当本机 DNS 被污染时需要设置；其他网络环境、以及部署在境外的线上环境都不需要。
 
+## 6. `onMounted` 里调用 Nuxt composable 会静默失效
+
+**现象**：`/preferences` 页首屏只有标题和一行提示，19 个类型按钮一个都不渲染；点任何东西都没反应。
+
+**定位**
+
+1. 该页 SSR 输出只有 4.8 KB，且不含任何类型名 → 数据不是服务端取的
+2. 看代码：`app/pages/preferences.vue` 在 `onMounted` 回调里调用 `getGenreList('movie')`
+3. 而 `getGenreList` → `fetchTMDB` 内部使用了 `useNuxtApp()` 和 `useState()`——都是依赖 setup 上下文的 Nuxt composable
+4. 对比项目内其它页面（`index.vue`、`recommend.vue`）都在 **setup 顶层** `await` 取数，只有这个页面用了 `onMounted`
+
+**根因**：`onMounted` 回调执行时已脱离 setup 上下文，Nuxt composable 在其中不可用；异常又被 `finally` 吞掉，表现为"静默无数据"。
+
+**解决**：改用 `useAsyncData`（在 setup 顶层执行，SSR 与客户端共享同一份数据）
+
+```ts
+const { data: genres, pending: loading } = await useAsyncData<Genre[]>('movie-genres', () => getGenreList('movie'))
+```
+
+**验证**：`/preferences` 的 SSR 输出 4.8 KB → 9.8 KB，19 个类型按钮全部渲染（按钮数 20，含"开始推荐"）。
+
+## 7. `fetchTMDB` 命中缓存时返回普通值而非 Promise
+
+**现象**：浏览器 Console 报 `fetchTMDB(...).then is not a function`（hydration 之后），`/recommend` 的客户端加载失效。
+
+**定位**
+
+`app/composables/tmdb.ts` 中：
+
+```ts
+const state = useState<any>(hash, () => null)
+if (state.value)
+  return state.value        // ← 命中缓存时返回的是普通值
+```
+
+SSR 时 `state` 为空，请求走 promiseCache（返回 Promise）；客户端 hydration 时 `state` 已从 payload 恢复出值，于是直接返回普通值，调用方的 `.then()` 报错。
+
+**解决**：始终返回 Promise
+
+```ts
+if (state.value)
+  return Promise.resolve(state.value)
+```
+
+**验证**：用 Playwright + 本机 Edge 复现"选两个类型 → 点开始推荐"流程，`pageerror` 从 `fetchTMDB(...).then is not a function` 变为**无错误**，跳转 URL 正常（`/recommend?genres=28,12&type=movie`）。
+
+## 8. 推荐用 OR 语义，与"动作喜剧"的直觉不符 -> 改成 AND
+
+**现象**：选「动作 + 喜剧」，结果里出现《阿甘正传》，用户认为不准确。
+
+**定位**
+
+1. 查《阿甘正传》(movie/13) 的 TMDB 类型：**喜剧 + 剧情 + 爱情** → 它确实带"喜剧"标签，数据没问题
+2. `with_genres=28|35`（OR）第 1 条是《盗梦空间》(`genre_ids=[28,878,12]`，不含喜剧)
+3. `with_genres=28,35`（AND）第 1 条是《死侍》(`genre_ids=[28,12,35]`) —— 这才是"动作喜剧"
+
+**根因**：TMDB 的 `with_genres` 里 `|` 表示 OR（任一匹配），`,` 表示 AND（全部匹配）。原实现用的是 `|`，而用户预期是 AND。
+
+**解决**：`preferences.vue` 的 `join('|')` 改为 `join(',')`，`recommend.vue` 的 `split('|')` 改为 `split(',')`；同时补充按钮态提示（未选够时显示"请至少选择 2 个类型"）与空结果提示（AND 更严格，结果可能为空）。
+
 ## 小结：这几轮排查里可复用的手法
 
 1. **先分层，再一次只动一个变量**：把「配置 / 应用代码 / 网络与 DNS / 打包产物」分开验证，不要一上来就改代码。
