@@ -1,0 +1,22 @@
+node_modules
+*.log
+dist
+.output
+.nuxt
+.env*
+!.env.example
+.nitro
+.DS_Store
+.idea
+.vercel
+
+coverage
+test-results
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# 本地临时残留
+*.bak
+*.tsbuildinfo
+

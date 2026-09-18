@@ -1,0 +1,11 @@
+strictPeerDependencies: false
+shamefullyHoist: true
+shellEmulator: true
+
+packages:
+  - proxy
+
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false
+  sharp: false
