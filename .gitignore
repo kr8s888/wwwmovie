@@ -9,6 +9,7 @@ dist
 .DS_Store
 .idea
 .vercel
+.netlify
 
 coverage
 test-results

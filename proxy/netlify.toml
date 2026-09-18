@@ -1,0 +1,14 @@
+# Netlify 部署配置（proxy 这个 Nitro 服务）
+#
+# 在 Netlify 导入本仓库时会被自动读取；你另外需要设置环境变量 TMDB_API_KEY。
+#
+# 说明：proxy 是仓库根 pnpm workspace 的成员，依赖安装必须在仓库根执行；
+#      Base directory 设为 proxy 后，Netlify 会自动向上找到 workspace 根安装依赖。
+
+[build]
+  base = "proxy"
+  command = "pnpm build"
+  publish = "dist"
+
+[build.environment]
+  NITRO_PRESET = "netlify"

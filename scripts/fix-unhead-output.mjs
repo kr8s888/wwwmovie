@@ -8,12 +8,22 @@ import { cpSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const src = resolve('node_modules/unhead/dist')
-const dst = resolve('.output/server/node_modules/unhead/dist')
 
-if (existsSync(src) && existsSync(dst)) {
-  cpSync(src, dst, { recursive: true, force: true })
-  console.log('[fix-unhead-output] unhead/dist 已复制到 .output/server/node_modules/unhead/dist')
+// 不同部署目标的产物路径不同（node-server 本地启动 / Netlify）
+const targets = [
+  '.output/server/node_modules/unhead/dist',
+  '.netlify/functions-internal/server/node_modules/unhead/dist',
+]
+
+let copied = 0
+for (const target of targets) {
+  const dst = resolve(target)
+  if (existsSync(dst)) {
+    cpSync(src, dst, { recursive: true, force: true })
+    copied += 1
+    console.log(`[fix-unhead-output] unhead/dist 已复制到 ${target}`)
+  }
 }
-else {
-  console.warn('[fix-unhead-output] 跳过：源或目标目录不存在')
-}
+
+if (!copied)
+  console.warn('[fix-unhead-output] 跳过：未找到需要补齐的产物目录')
