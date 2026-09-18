@@ -3,18 +3,13 @@ import type { Genre } from '#shared/types'
 
 const { t } = useI18n()
 
-const genres = ref<Genre[]>([])
+// 在 setup 顶层用 useAsyncData 取数：SSR 与浏览器端都能正常拿到数据，
+// 也避免在 onMounted 里调用依赖 Nuxt 上下文的 composable（那样会静默失败）
+const { data: genres, pending: loading } = await useAsyncData<Genre[]>(
+  'movie-genres',
+  () => getGenreList('movie'),
+)
 const selected = ref<number[]>([])
-const loading = ref(true)
-
-onMounted(async () => {
-  try {
-    genres.value = await getGenreList('movie')
-  }
-  finally {
-    loading.value = false
-  }
-})
 
 function toggle(id: number) {
   const i = selected.value.indexOf(id)
@@ -51,7 +46,7 @@ function start() {
 
     <div v-else grid="~ cols-2 md:cols-3 lg:cols-4" gap3 mt6>
       <button
-        v-for="genre of genres"
+        v-for="genre of (genres || [])"
         :key="genre.id"
         type="button"
         flex="~ col"
