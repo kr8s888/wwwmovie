@@ -66,6 +66,7 @@ pnpm build && pnpm start
 |---|---|---|
 | `proxy/.env` | `TMDB_API_KEY` | TMDB API Key，**只放在这里**；该文件已被 `.gitignore` 忽略，切勿提交 |
 | 前端构建时（可选） | `VITE_API_BASE_URL` | 覆盖代理地址。**默认** `http://localhost:3001`；设为具体域名时前后端都用它（线上双服务部署）；设为 `same-origin` 时浏览器走同源相对路径（配合反向代理 / 内网穿透，服务端仍直连本机代理） |
+| 本地代理（可选） | `TMDB_API_IP` | 仅当本机 DNS 把 `api.themoviedb.org` 解析到被污染 IP 时设置：填一个可用的真实 IP，代理会直连它（SNI/证书仍用域名）。不设置时行为与上游一致 |
 
 `apiBaseUrl` 的定义在 `nuxt.config.ts` 与 `app/composables/tmdb.ts` 两处。线上部署的完整步骤见 **[docs/deploy-vercel.md](./docs/deploy-vercel.md)**。
 

@@ -176,6 +176,38 @@ ls .output/server/node_modules/unhead/dist
 
 ---
 
+## 5. 本机 DNS 污染：Node 内置 fetch 无法用预加载补丁修正
+
+**现象**：代理对 TMDB 的所有请求 21 秒超时（`fetch failed`），但用 `curl` 直连同一地址很快返回 200。
+
+**定位**
+
+1. `nslookup api.themoviedb.org` 解析到 Meta/Facebook 的 IP 段（`157.240.x`、`2a03:2880::/32`）→ DNS 污染
+2. `curl --resolve api.themoviedb.org:443:<真实IP>` 返回 200 → 网络可达，问题只在解析
+3. 用 `NODE_OPTIONS=--import=...` 预加载脚本 patch `dns.lookup`：**无效**。装探针后确认，进程内的请求**从未调用**被 patch 的 `dns.lookup` / `net.connect` / `tls.connect`
+   → 结论：Node 内置 `fetch`（undici）使用内部缓存的引用与解析实现，改公共 API 拦不到它
+4. 改成 patch `globalThis.fetch` 同样无效（nitro 的 ofetch 在模块初始化时就缓存了 fetch 引用）
+
+**解决**：给代理加一个**默认关闭**的 IP 直连分支（`proxy/utils/tmdb-fetch.ts`）
+
+- 默认（不设 `TMDB_API_IP`）：行为与上游完全一致，走 `$fetch`
+- 设置 `TMDB_API_IP=<真实 IP>`：用 `node:https` 直连该 IP，**SNI 与证书校验仍使用域名**（原理等价于 `curl --resolve`，安全性与正常访问相同）
+
+**验证（同一台机器、同一接口、各连续 3 次）**
+
+| 配置 | 结果 |
+|---|---|
+| 不设 `TMDB_API_IP` | `500 / 21.42s`（污染 IP，连接超时） |
+| `TMDB_API_IP=99.84.152.53` | `200 / 0.756s`、`200 / 0.330s`、`200 / 0.318s` |
+
+**真实 IP 怎么查**（CloudFront 的 IP 会轮换）
+
+```bash
+curl -s "https://doh.pub/dns-query?name=api.themoviedb.org&type=A"
+```
+
+**适用范围**：仅当本机 DNS 被污染时需要设置；其他网络环境、以及部署在境外的线上环境都不需要。
+
 ## 小结：这几轮排查里可复用的手法
 
 1. **先分层，再一次只动一个变量**：把「配置 / 应用代码 / 网络与 DNS / 打包产物」分开验证，不要一上来就改代码。

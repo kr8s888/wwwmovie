@@ -17,17 +17,18 @@ export default defineCachedEventHandler(async (event) => {
   if (!config.tmdb.apiKey)
     throw new Error('TMDB API key is not set')
   try {
-    return await $fetch(event.context.params!.path, {
-      baseURL: TMDB_API_URL,
-      params: {
+    return await tmdbFetch(
+      event.context.params!.path,
+      {
         api_key: config.tmdb.apiKey,
         language: 'en-US',
         ...query,
       },
-      headers: {
-        Accept: 'application/json',
+      {
+        baseURL: TMDB_API_URL,
+        headers: { Accept: 'application/json' },
       },
-    })
+    )
   }
   catch (e: any) {
     const status = e?.response?.status || 500
