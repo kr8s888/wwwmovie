@@ -28,49 +28,54 @@ API Key 只存在于代理服务端的环境变量里，前端代码中不出现
 
 前置条件：
 
-- **Node.js 22+** —— `package.json` 的 `devEngines` 要求 Node `^24`，pnpm ≥ 10.14 会按需自动拉取匹配版本；若下载缓慢，可先手动安装 Node 24
-- **pnpm 11** —— 推荐 `npm i -g pnpm@11.1.2`；用 corepack 的话，Windows 上若报权限错误（`EPERM ... Program Files
+- **Node.js 22+** —— `package.json` 的 `devEngines` 要求 Node `^24`，pnpm ≥ 10.14 会按需自动拉取匹配版本
+- **pnpm 11** —— 推荐 `npm i -g pnpm@11.1.2`；用 corepack 时，Windows 上若报权限错误（`EPERM ... Program Files
 odejs`）改用 `corepack enable --install-directory "$env:APPDATA
 pm"`
 - 一个免费的 TMDB API Key
 
 ```bash
-# 1. 安装依赖（在根目录执行即可：pnpm workspace 会把 proxy 一起装上）
+# 1. 安装依赖
 pnpm install
 
-# 2. 配置密钥
-cp proxy/.env.example proxy/.env
-# Windows PowerShell: Copy-Item proxy\.env.example proxy\.env
-# 编辑 proxy/.env，把 TMDB_API_KEY= 后面填上自己的 Key（保存，不要加引号）
+# 2. 配置密钥（项目根目录）
+cp .env.example .env
+# Windows PowerShell: Copy-Item .env.example .env
+# 编辑 .env，把 TMDB_API_KEY= 后面填上自己的 Key（保存，不要加引号）
 
-# 3. 两个终端分别启动
-pnpm dev:proxy   # 终端 1：本地 TMDB 代理，端口 3001
-pnpm dev         # 终端 2：开发服务器，端口 3000
+# 3. 启动
+pnpm dev
 ```
 
 打开 <http://localhost:3000>；类型推荐入口 <http://localhost:3000/preferences>。
 
-> **不需要改任何代码**：前端默认就指向本地代理 `http://localhost:3001`（定义在 `nuxt.config.ts` 和 `app/composables/tmdb.ts`）。
-> 只有当代理与前端不在同一台机器上（即部署到线上）时，才需要用 `VITE_API_BASE_URL` 指定代理地址。
+> **只需要一个终端**：TMDB 代理与图片优化都由应用自己的 server routes 提供
+> （`server/routes/tmdb/[...path].ts`、`server/routes/ipx/[...path].ts`），
+> 所以本地开发和线上部署都不必单独启动代理服务。
 
 TMDB Key 申请：<https://www.themoviedb.org/signup> 注册后到 <https://www.themoviedb.org/settings/api> 创建（选 Developer，用途随便填）。
 
 ```bash
-# 生产模式本地验证
+# 生产模式本地验证（会自动读取根目录的 .env）
 pnpm build && pnpm start
 ```
+
+> 如果你的网络访问 `api.themoviedb.org` 异常（DNS 被污染），可在 `.env` 里加
+> `TMDB_API_IP=<可用的真实 IP>`，服务端会直连该 IP（SNI/证书仍用域名）。
+> 查询真实 IP：`curl.exe -s "https://doh.pub/dns-query?name=api.themoviedb.org&type=A"`
 
 ## 环境变量
 
 | 位置 | 变量 | 说明 |
 |---|---|---|
-| `proxy/.env` | `TMDB_API_KEY` | TMDB API Key，**只放在这里**；该文件已被 `.gitignore` 忽略，切勿提交 |
-| 前端构建时（可选） | `VITE_API_BASE_URL` | 覆盖代理地址。**默认** `http://localhost:3001`；设为具体域名时前后端都用它（线上双服务部署）；设为 `same-origin` 时浏览器走同源相对路径（配合反向代理 / 内网穿透，服务端仍直连本机代理） |
-| 本地代理（可选） | `TMDB_API_IP` | 仅当本机 DNS 把 `api.themoviedb.org` 解析到被污染 IP 时设置：填一个可用的真实 IP，代理会直连它（SNI/证书仍用域名）。不设置时行为与上游一致 |
+| `.env`（根目录） | `TMDB_API_KEY` | **必填**。应用内的 server routes 用它访问 TMDB；该文件已被 `.gitignore` 忽略 |
+| `.env`（根目录，可选） | `TMDB_API_IP` | 本机 DNS 把 `api.themoviedb.org` 解析到被污染 IP 时，填一个可用真实 IP，服务端直连它 |
+| `.env`（根目录，可选） | `BASE_URL` | 站点地址，默认 `http://localhost:3000` |
+| 构建时（可选） | `VITE_API_BASE_URL` | 默认**同源**（走应用内 server routes）。仅在你想指向**外部独立代理服务**时才需要填写 |
+| `proxy/.env` | `TMDB_API_KEY` | 只在你要单独跑仓库里那个独立 `proxy/` 服务时才需要 |
 
-`apiBaseUrl` 的定义在 `nuxt.config.ts` 与 `app/composables/tmdb.ts` 两处。线上部署完整步骤见 **[docs/deploy-netlify.md](./docs/deploy-netlify.md)**（推荐）或 **[docs/deploy-vercel.md](./docs/deploy-vercel.md)**。
-
-> 仓库根目录的 `.env.example` 里的 `BASE_URL` 是上游模板遗留项，当前代码未使用，可忽略。
+线上部署步骤见 **[docs/deploy-netlify.md](./docs/deploy-netlify.md)**（单站点，推荐）；
+如果想用"独立代理 + 前端"的双服务架构，见 [docs/deploy-vercel.md](./docs/deploy-vercel.md)。
 
 ## 我做了什么
 

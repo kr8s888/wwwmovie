@@ -1,3 +1,7 @@
+> ℹ️ **说明**：自提交 `4ba044c` 起，代理逻辑已并入前端应用（`server/routes/tmdb`、`server/routes/ipx`），
+> 线上**只需要一个部署**即可 —— 推荐看 [deploy-netlify.md](./deploy-netlify.md)。
+> 本文档保留的是"独立 proxy + 前端"的**双服务**部署方式，需要时仍可用。
+
 # 部署到 Vercel（双服务）
 
 本项目线上需要**两个 Vercel 项目**：一个跑 TMDB 代理（`proxy/`），一个跑前端（仓库根目录）。
