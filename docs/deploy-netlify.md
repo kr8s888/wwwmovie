@@ -29,7 +29,7 @@ Netlify → **Add new site → Import an existing project → GitHub** → 选 `
 
 | 配置项 | 值 | 说明 |
 |---|---|---|
-| **Base directory** | `proxy` | 仓库里已放置 `proxy/netlify.toml`，其中 `base = "proxy"`、`command = "pnpm build"` |
+| **Base directory** | `proxy` | 在导入页的 Build settings 里填（**不要手写 netlify.toml**：显式 build 配置会让 Netlify 放弃对 Nitro 的自动检测，从而不生成路由规则，导致全站 404） |
 | Build command / Publish directory | **留空** | Netlify 自动识别 Nitro（不要手填，填了反而会冲突） |
 | **Environment variables** | `TMDB_API_KEY = 你的 Key` | 环境勾选 **Production / Preview / Deploy previews 全部** |
 
@@ -97,6 +97,19 @@ curl -s -o /dev/null -w '%{http_code}\n' https://<前端站点>.netlify.app/
 ```
 
 浏览器再确认：首页有海报、搜索可用、`/preferences` 选 2~3 个类型能出推荐、标题是 `wwwmovie`。
+
+## 4.1 关于路由（`_redirects`）
+
+Netlify 上 Nitro 的请求转发依赖构建产物 `dist/_redirects`。两条保障：
+
+1. Netlify 检测到 Nitro 时会自动生成（所以**不要在仓库里放 netlify.toml**，否则自动检测失效）；
+2. 仓库里另有一份显式兜底：`proxy/public/_redirects`
+
+```
+/*    /.netlify/functions/server   200
+```
+
+Nitro 构建时会把它复制到 `dist/` 并追加自己的规则（本地验证：`NITRO_PRESET=netlify pnpm build` 后 `proxy/dist/_redirects` 应包含上面这行）。
 
 ## 5. 注意点与已知问题
 
