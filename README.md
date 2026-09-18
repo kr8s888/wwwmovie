@@ -62,15 +62,42 @@ pnpm build && pnpm start
 
 `apiBaseUrl`（`nuxt.config.ts` 与 `app/composables/tmdb.ts`）当前指向本地代理 `http://localhost:3001`；部署到线上时改成代理服务的公网地址。
 
-## 与上游的差异
+## 我做了什么
 
-- 新增「按类型推荐」两页（`app/pages/preferences.vue`、`app/pages/recommend.vue`），`getMediaByGenre` 增加 `sortBy` 参数，导航栏加入口
-- 依赖从 `nuxt-nightly` 降到稳定版 Nuxt 4.5.2，并显式固定 `unhead` / `@unhead/vue` 3.3.2（修复 nightly 的 `precomputed` 数据缺失导致的 500，以及 unhead 版本漂移）
-- 新增 `scripts/fix-unhead-output.mjs`，在 `pnpm build` 后补齐 Nitro 打包遗漏的 unhead 文件
-- 数据源由上游代理切换为本地代理，`apiBaseUrl` 改为 `http://localhost:3001`
-- 中英文语言包补充推荐功能文案；语言包精简为 en + zh-CN（其余 12 个已删除）
-- 站点名称品牌化为 wwwmovie（`app/app.vue` 标题与描述、页脚、proxy/server 文案、e2e 断言），并移除上游的 twitter 账号元信息
-- 目录结构整理、README 重写
+> 边界说明：页面结构、UI 组件、TMDB 请求封装、i18n 框架与代理服务骨架来自上游示例（见文末 Credits）。以下是在此基础上的改动，都标了代码位置，方便核对。
+
+### 1. 新增功能：按类型推荐（多选 → 组合查询 → 排序 → 无限滚动）
+
+- `app/pages/preferences.vue`（75 行）：加载 TMDB 类型列表并网格多选，**上限 3 个**、**至少 2 个**才允许提交，选完跳转 `/recommend?genres=28|35&type=movie`
+- `app/pages/recommend.vue`（42 行）：按所选类型请求结果，无限滚动翻页
+- `app/composables/tmdb.ts`：`getMediaByGenre` 增加第 4 个参数 `sortBy`（默认 `popularity.desc`，不改变既有调用行为）
+
+技术要点：
+
+- 多类型走 TMDB `discover` 接口的 `with_genres`，多个 id 用 **`|` 连接表示 OR**（`, ` 是 AND）——这是"选了几个类型就都得兼顾"能成立的关键
+- 结果按 `sort_by=vote_count.desc` 排序，避免小样本影片靠平均分刷到前面
+- 导航栏加入口，中英文文案补齐
+
+### 2. 修复生产构建（开发模式正常、生产模式全站 500）
+
+| 问题 | 根因 | 处理 |
+|---|---|---|
+| 生产下所有页面 500 | 上游依赖 `nuxt-nightly`，其 `precomputed` 数据在产物里是空桩 | 固定到稳定版 **Nuxt 4.5.2** |
+| 运行时 `ERR_MODULE_NOT_FOUND` | `unhead` 声明 `^3.3.1` 被解析到 3.4.x，目录结构不兼容 | 在 `dependencies` 里显式钉死 **3.3.2**（只改 `pnpm.overrides` 会被 pnpm 11 跳过） |
+| 产物缺 `unhead/dist` 文件 | Nitro 打包时依赖复制遗漏 | 新增 `scripts/fix-unhead-output.mjs`，挂到 `pnpm build` 之后自动补齐 |
+
+完整的定位过程、命令与验证数据见 **[docs/troubleshooting.md](./docs/troubleshooting.md)**。
+
+### 3. 开发环境与工程化
+
+- 数据源从上游作者部署的代理切到本地代理：`apiBaseUrl` 改为 `http://localhost:3001`（`nuxt.config.ts`、`app/composables/tmdb.ts`）
+- 品牌化：站点标题 / `titleTemplate` / description / `og:image` 改为 wwwmovie，页脚、`proxy/routes/index.ts`、`server/api/index.ts` 文案同步；移除指向上游的 `@nuxt_js` twitter 元信息
+- i18n 精简：`locales` 从 14 个减到 **en + zh-CN**，删除其余 12 个语言包，并同步修改了 e2e 里写死 `fr-FR` 的语言切换断言
+- 目录结构调整（去掉解压产生的嵌套层）、`.gitignore` 补齐、README 重写
+
+### 4. 一次完整的网络层排障（DNS 污染）
+
+本机无法访问 `api.themoviedb.org`，最终定位为 DNS 污染（域名被解析到 Meta 的 IP 段），用 DoH + Node 预加载模块覆盖解析解决，未改任何系统设置。同机对比：**修复前 10.7s 失败 → 修复后 688ms 成功**。过程见 [docs/troubleshooting.md](./docs/troubleshooting.md)。
 
 ## Credits & License
 
