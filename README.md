@@ -60,7 +60,7 @@ pnpm build && pnpm start
 | `proxy/.env` | `TMDB_API_KEY` | TMDB API Key，**只放在这里**，已被 `.gitignore` 忽略，切勿提交 |
 | `.env`（根目录） | `BASE_URL` | 前端站点地址，默认 `http://localhost:3000` |
 
-`apiBaseUrl`（`nuxt.config.ts` 与 `app/composables/tmdb.ts`）当前指向本地代理 `http://localhost:3001`；部署到线上时改成代理服务的公网地址。
+`apiBaseUrl`（`nuxt.config.ts` 与 `app/composables/tmdb.ts`）当前指向本地代理 `http://localhost:3001`；部署到线上时改成代理服务的公网地址，完整步骤见 **[docs/deploy-vercel.md](./docs/deploy-vercel.md)**。
 
 ## 我做了什么
 
