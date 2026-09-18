@@ -1,0 +1,4 @@
+# 只声明构建环境变量，不覆盖 Netlify 对 Nitro 的自动检测（base directory 请在 Netlify 界面里设置）
+
+[build.environment]
+  NITRO_PRESET = "netlify"
