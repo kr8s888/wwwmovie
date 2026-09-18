@@ -26,25 +26,32 @@ API Key 只存在于代理服务端的环境变量里，前端代码中不出现
 
 ## 本地运行
 
-前置：Node.js 22+、`corepack`（用于启用 pnpm）、一个免费的 TMDB API Key。
+前置条件：
+
+- **Node.js 22+** —— `package.json` 的 `devEngines` 要求 Node `^24`，pnpm ≥ 10.14 会按需自动拉取匹配版本；若下载缓慢，可先手动安装 Node 24
+- **pnpm 11** —— 推荐 `npm i -g pnpm@11.1.2`；用 corepack 的话，Windows 上若报权限错误（`EPERM ... Program Files
+odejs`）改用 `corepack enable --install-directory "$env:APPDATA
+pm"`
+- 一个免费的 TMDB API Key
 
 ```bash
-# 1. 启用 pnpm 并安装依赖（根目录与 proxy 各一次）
-corepack enable
+# 1. 安装依赖（在根目录执行即可：pnpm workspace 会把 proxy 一起装上）
 pnpm install
-cd proxy && pnpm install && cd ..
 
-# 2. 配置密钥：复制模板后填入自己的 Key
+# 2. 配置密钥
 cp proxy/.env.example proxy/.env
-# PowerShell 用：Copy-Item proxy\.env.example proxy\.env
-# 编辑 proxy/.env，把 TMDB_API_KEY= 后面填上自己的 Key（保存，勿加引号）
+# Windows PowerShell: Copy-Item proxy\.env.example proxy\.env
+# 编辑 proxy/.env，把 TMDB_API_KEY= 后面填上自己的 Key（保存，不要加引号）
 
 # 3. 两个终端分别启动
 pnpm dev:proxy   # 终端 1：本地 TMDB 代理，端口 3001
 pnpm dev         # 终端 2：开发服务器，端口 3000
 ```
 
-打开 <http://localhost:3000> ；类型推荐入口：<http://localhost:3000/preferences>。
+打开 <http://localhost:3000>；类型推荐入口 <http://localhost:3000/preferences>。
+
+> **不需要改任何代码**：前端默认就指向本地代理 `http://localhost:3001`（定义在 `nuxt.config.ts` 和 `app/composables/tmdb.ts`）。
+> 只有当代理与前端不在同一台机器上（即部署到线上）时，才需要用 `VITE_API_BASE_URL` 指定代理地址。
 
 TMDB Key 申请：<https://www.themoviedb.org/signup> 注册后到 <https://www.themoviedb.org/settings/api> 创建（选 Developer，用途随便填）。
 
@@ -57,10 +64,12 @@ pnpm build && pnpm start
 
 | 位置 | 变量 | 说明 |
 |---|---|---|
-| `proxy/.env` | `TMDB_API_KEY` | TMDB API Key，**只放在这里**，已被 `.gitignore` 忽略，切勿提交 |
-| `.env`（根目录） | `BASE_URL` | 前端站点地址，默认 `http://localhost:3000` |
+| `proxy/.env` | `TMDB_API_KEY` | TMDB API Key，**只放在这里**；该文件已被 `.gitignore` 忽略，切勿提交 |
+| 前端构建时（可选） | `VITE_API_BASE_URL` | 覆盖代理地址。**默认** `http://localhost:3001`；设为具体域名时前后端都用它（线上双服务部署）；设为 `same-origin` 时浏览器走同源相对路径（配合反向代理 / 内网穿透，服务端仍直连本机代理） |
 
-`apiBaseUrl`（`nuxt.config.ts` 与 `app/composables/tmdb.ts`）当前指向本地代理 `http://localhost:3001`；部署到线上时改成代理服务的公网地址，完整步骤见 **[docs/deploy-vercel.md](./docs/deploy-vercel.md)**。
+`apiBaseUrl` 的定义在 `nuxt.config.ts` 与 `app/composables/tmdb.ts` 两处。线上部署的完整步骤见 **[docs/deploy-vercel.md](./docs/deploy-vercel.md)**。
+
+> 仓库根目录的 `.env.example` 里的 `BASE_URL` 是上游模板遗留项，当前代码未使用，可忽略。
 
 ## 我做了什么
 

@@ -2,7 +2,12 @@ import type { Credits, Media, MediaType, PageResult, Person } from '#shared/type
 import { LRUCache } from 'lru-cache'
 import { hash as ohash } from 'ohash'
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || (import.meta.server ? 'http://localhost:3001' : '')
+// 默认两端都直连本地代理；设 VITE_API_BASE_URL 可覆盖（线上部署用）
+// 设为 'same-origin'：浏览器走同源相对路径，服务端仍直连本机代理（配合反向代理/内网穿透）
+const rawApiBase = import.meta.env.VITE_API_BASE_URL
+const apiBaseUrl = rawApiBase === 'same-origin'
+  ? (import.meta.server ? 'http://localhost:3001' : '')
+  : (rawApiBase || 'http://localhost:3001')
 // const apiBaseUrl = 'https://movies-proxy.vercel.app'
 
 const promiseCache = new LRUCache<string, any>({
