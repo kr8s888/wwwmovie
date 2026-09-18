@@ -1,7 +1,10 @@
 // 代理地址优先级：VITE_API_BASE_URL 环境变量 > 默认本地代理 http://localhost:3001
 // 特例：设为 'same-origin' 时图片走同源相对路径（配合反向代理/内网穿透）
+// 默认同源：/tmdb/**、/ipx/** 由本应用的 server routes 处理
+// （本地开发与线上部署都不需要单独的代理服务）
+// 若要指向外部代理服务，设 VITE_API_BASE_URL=https://your-proxy.example.com
 const rawApiBase = process.env.VITE_API_BASE_URL
-const apiBaseUrl = rawApiBase === 'same-origin' ? '' : (rawApiBase || 'http://localhost:3001')
+const apiBaseUrl = rawApiBase && rawApiBase !== 'same-origin' ? rawApiBase : ''
 // const apiBaseUrl = 'https://movies-proxy.vercel.app'
 
 export default defineNuxtConfig({

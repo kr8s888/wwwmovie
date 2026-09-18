@@ -14,6 +14,12 @@ importers:
       '@unhead/vue':
         specifier: 3.3.2
         version: 3.3.2(@oxc-project/types@0.148.0)(esbuild@0.28.2)(lightningcss@1.33.0)(oxc-parser@0.148.0)(rolldown@1.2.7)(rollup@4.63.1)(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.0))(vue@3.5.42(typescript@6.0.3))(webpack@5.110.3(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.28))
+      h3:
+        specifier: ^1.15.11
+        version: 1.15.11
+      ipx:
+        specifier: 4.0.0-beta.1
+        version: 4.0.0-beta.1(@types/node@26.4.1)(unstorage@1.17.5(db0@0.3.4)(ioredis@5.11.1))
       unhead:
         specifier: 3.3.2
         version: 3.3.2(esbuild@0.28.2)(rolldown@1.2.7)(rollup@4.63.1)(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.0))(webpack@5.110.3(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.28))

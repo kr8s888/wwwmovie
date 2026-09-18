@@ -4,10 +4,10 @@ import { hash as ohash } from 'ohash'
 
 // 默认两端都直连本地代理；设 VITE_API_BASE_URL 可覆盖（线上部署用）
 // 设为 'same-origin'：浏览器走同源相对路径，服务端仍直连本机代理（配合反向代理/内网穿透）
+// 默认同源：浏览器请求 /tmdb/**；服务端由 Nuxt 直接内部调用同名 server route
+// 需要指向外部代理时用 VITE_API_BASE_URL=https://your-proxy.example.com
 const rawApiBase = import.meta.env.VITE_API_BASE_URL
-const apiBaseUrl = rawApiBase === 'same-origin'
-  ? (import.meta.server ? 'http://localhost:3001' : '')
-  : (rawApiBase || 'http://localhost:3001')
+const apiBaseUrl = rawApiBase && rawApiBase !== 'same-origin' ? rawApiBase : ''
 // const apiBaseUrl = 'https://movies-proxy.vercel.app'
 
 const promiseCache = new LRUCache<string, any>({

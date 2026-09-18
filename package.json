@@ -20,7 +20,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "nuxt prepare",
-    "start": "node .output/server/index.mjs",
+    "start": "node --env-file-if-exists=.env .output/server/index.mjs",
     "test:codegen": "bunx playwright codegen http://localhost:3000/",
     "test:unit": "vitest",
     "test:unit-coverage": "vitest --coverage",
@@ -32,6 +32,8 @@
   "dependencies": {
     "@nuxtjs/html-validator": "^2.1.0",
     "@unhead/vue": "3.3.2",
+    "h3": "^1.15.11",
+    "ipx": "4.0.0-beta.1",
     "unhead": "3.3.2",
     "vue-router-better-scroller": "^0.0.0"
   },
