@@ -15,8 +15,8 @@ const props = defineProps<{
     data-testid="photo-button"
   >
     <NuxtImg
-      width="400"
-      height="600"
+      width="300"
+      height="450"
       format="webp"
       :src="`/tmdb${props.item.file_path}`"
       alt="Photo"
