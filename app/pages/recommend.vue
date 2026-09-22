@@ -16,24 +16,16 @@ const genreNames = computed(() =>
     .join(' · '),
 )
 
-const items: Media[] = reactive([])
-const fetched = ref(false)
-const meta = ref<{ formula: string, m: number, c: number, candidates: number } | null>(null)
+// 在 setup 顶层取数（SSR 与浏览器端都能拿到，算法说明首屏即可见）
+const { data } = await useAsyncData(
+  () => `ranked-${type.value}-${genres.value}-${locale.value}`,
+  () => genres.value
+    ? getRankedRecommendations(type.value, genres.value, { language: locale.value })
+    : Promise.resolve(null),
+)
 
-let loaded = false
-
-async function fetch(_page: number) {
-  // 加权评分需要先取候选池再整体重排，所以一次性返回结果，不分页
-  if (!genres.value || loaded)
-    return
-  loaded = true
-  const { results, meta: info } = await getRankedRecommendations(type.value, genres.value, {
-    language: locale.value,
-  })
-  items.push(...results)
-  meta.value = info
-  fetched.value = true
-}
+const items = computed<Media[]>(() => data.value?.results ?? [])
+const meta = computed(() => data.value?.meta ?? null)
 </script>
 
 <template>
@@ -41,26 +33,33 @@ async function fetch(_page: number) {
     <div v-if="!genres" p8>
       <p>{{ t('No genres selected') }}</p>
     </div>
-    <MediaAutoLoadGrid
-      v-else
-      :fetch="fetch"
-      :type="type"
-      :items="items"
-      :count="items.length || undefined"
-    >
-      {{ t('Recommended for you') }}：{{ genreNames }}
-    </MediaAutoLoadGrid>
 
-    <div v-if="meta" px8 pb8 text-sm op60>
-      <div>{{ t('Ranked by weighted rating') }}</div>
-      <code>{{ meta.formula }}</code>
-      <div mt1>
-        m = {{ meta.m }} · C = {{ meta.c.toFixed(2) }} · {{ t('Candidates') }} {{ meta.candidates }}
+    <div v-else>
+      <h1 flex="~" px8 pt8 gap2 text-3xl>
+        {{ t('Recommended for you') }}：{{ genreNames }}
+      </h1>
+
+      <MediaGrid>
+        <MediaCard
+          v-for="(item, index) of items"
+          :key="item.id"
+          :type="type"
+          :item="item"
+          :priority="index < 10"
+        />
+      </MediaGrid>
+
+      <div v-if="meta" px8 pb8 text-sm op60>
+        <div>{{ t('Ranked by weighted rating') }}</div>
+        <code>{{ meta.formula }}</code>
+        <div mt1>
+          m = {{ meta.m }} · C = {{ meta.c.toFixed(2) }} · {{ t('Candidates') }} {{ meta.candidates }}
+        </div>
       </div>
-    </div>
 
-    <p v-if="fetched && items.length === 0" p8 op60>
-      {{ t('No results for these genres') }}
-    </p>
+      <p v-if="!items.length" p8 op60>
+        {{ t('No results for these genres') }}
+      </p>
+    </div>
   </div>
 </template>
