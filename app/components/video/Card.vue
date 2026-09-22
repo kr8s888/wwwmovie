@@ -22,8 +22,8 @@ function play() {
     >
       <NuxtImg
         :src="`/youtube/vi/${item.key}/maxresdefault.jpg`"
-        width="400"
-        height="600"
+        width="300"
+        height="450"
         format="webp"
         :alt="props.item.name"
         w-full h-full object-cover

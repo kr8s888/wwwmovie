@@ -7,7 +7,7 @@ import { fromWebHandler } from 'h3'
 import { createIPX, createIPXFetchHandler, ipxHttpStorage } from 'ipx'
 
 const ipx = createIPX({
-  maxAge: 3600,
+  maxAge: 60 * 60 * 24 * 30, // 30 天：让 CDN 与浏览器长期缓存，显著减少重复流量
   alias: {
     '/tmdb': 'https://image.tmdb.org/t/p/original/',
     '/youtube': 'https://img.youtube.com/',

@@ -23,8 +23,8 @@ function playTrailer() {
       lg="bottom-0 left-1/3"
     >
       <NuxtImg
-        width="1220"
-        height="659"
+        width="960"
+        height="519"
         format="webp"
         :src="`/tmdb${props.item.backdrop_path}`"
         :alt="props.item.title || props.item.name"
