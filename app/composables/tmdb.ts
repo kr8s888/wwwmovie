@@ -147,6 +147,23 @@ export function getCredits(id: string | number, type: string): Promise<Credits> 
 /**
  * Get genre list
  */
+/**
+ * 类型推荐（按加权评分排序）
+ * 公式与实现见 server/api/recommend.get.ts
+ */
+export async function getRankedRecommendations(
+  media: string,
+  genres: string,
+  options: { m?: number, pool?: number, language?: string } = {},
+): Promise<{
+  results: (Media & { weighted_rating: number })[]
+  meta: { formula: string, m: number, c: number, candidates: number, pool: number }
+}> {
+  return await $fetch('/api/recommend', {
+    params: { type: media, genres, ...options },
+  }) as any
+}
+
 export function getGenreList(media: string): Promise<{ name: string, id: number }[]> {
   return fetchTMDB(`genre/${media}/list`).then(res => res.genres)
 }

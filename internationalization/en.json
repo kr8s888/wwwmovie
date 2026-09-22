@@ -6,17 +6,13 @@
   "Popular TV Shows": "Popular TV Shows",
   "Top Rated TV Shows": "Top Rated TV Shows",
   "TV Shows Airing Today": "TV Shows Airing Today",
-
   "Watch Trailer": "Watch Trailer",
   "Explore more": "Explore more",
-
   "Overview": "Overview",
   "Videos": "Videos",
   "Media Photos": "Photos",
-
   "Cast": "Cast",
   "More like this": "More like this",
-
   "Storyline": "Storyline",
   "Release Date": "Released",
   "Runtime": "Runtime",
@@ -27,10 +23,8 @@
   "Status": "Status",
   "Language": "Language",
   "Production": "Production",
-
   "Backdrops": "Backdrops",
   "Posters": "Posters",
-
   "Known For": "Known For",
   "Credits": "Credits",
   "Person Photos": "Photos",
@@ -38,31 +32,22 @@
   "Known for": "Known for",
   "Place of birth": "Place of birth",
   "Birthday": "Birthday",
-
   "Acting Credits": "Acting",
   "Production Credits": "Production",
-
   "Type to search...": "Type to search...",
   "Type something to search...": "Type something to search...",
-
   "{numberOfReviews} Reviews": "{numberOfReviews} Reviews",
-
   "{numberOfImages} Images": "{numberOfImages} Images",
   "{numberOfVideos} Videos": "{numberOfVideos} Videos",
-
   "as {character}": "as {character}",
-
   "{count} items": "{count} items",
   "Search result for: {currentSearch}": "Search result for: {currentSearch}",
-
   "Error occurred on fetching": "Error occurred on fetching",
   "Retry": "Retry",
-
   "Home": "Home",
   "Movies": "Movies",
   "TV Shows": "TV Shows",
   "Search": "Search",
-
   "Recommend": "Recommend",
   "Recommended for you": "Recommended for you",
   "Select 2-3 genres to get recommendations": "Select 2-3 genres to get personalized recommendations",
@@ -70,5 +55,7 @@
   "No genres selected": "No genres selected",
   "Select at least 2 genres": "Select at least 2 genres",
   "All selected genres must match": "Only titles matching all selected genres are shown",
-  "No results for these genres": "No titles match all the selected genres - try removing one"
+  "No results for these genres": "No titles match all the selected genres - try removing one",
+  "Ranked by weighted rating": "Ranked by weighted rating (IMDb formula)",
+  "Candidates": "candidates:"
 }
