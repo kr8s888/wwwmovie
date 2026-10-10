@@ -26,7 +26,7 @@ function start() {
     return
   navigateTo({
     path: '/recommend',
-    // 逗号分隔 = TMDB 的 AND 语义：推荐同时属于这些类型的影片
+    // 逗号分隔 = TMDB 的 AND 语义：只保留同时属于这些类型的影片
     query: { genres: selected.value.join(','), type: 'movie' },
   })
 }

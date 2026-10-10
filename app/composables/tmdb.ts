@@ -148,7 +148,7 @@ export function getCredits(id: string | number, type: string): Promise<Credits> 
  * Get genre list
  */
 /**
- * 类型推荐（按加权评分排序）
+ * 类型榜单（按加权评分排序）
  * 公式与实现见 server/api/recommend.get.ts
  */
 export async function getRankedRecommendations(

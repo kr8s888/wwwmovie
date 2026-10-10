@@ -2,8 +2,14 @@
 <img height="100px" src="./public/movies.webp" alt="Movies logo" />
 </p>
 
-<h1 align="center">wwwmovie · 电影浏览与按类型推荐</h1>
-<br>
+<h1 align="center">wwwmovie · 电影浏览与类型榜单</h1>
+
+<p align="center">
+  <b>🔗 线上体验：<a href="https://wwwmovie-kr8s888.netlify.app">wwwmovie-kr8s888.netlify.app</a></b>
+</p>
+
+<img width="1191" src="./docs/screenshot-home.png" alt="wwwmovie 首页">
+<img width="1191" src="./docs/screenshot-recommend.png" alt="按加权评分排序的类型榜单">
 
 > 基于 [Nuxt](https://github.com/nuxt/nuxt) 的电影浏览网站，在 Nuxt 官方示例 [tastejs/nuxt-movies](https://github.com/tastejs/nuxt-movies)（MIT）基础上二次开发，数据来自 [The Movie Database (TMDB)](https://www.themoviedb.org) API。
 >
@@ -14,15 +20,18 @@
 - **首页 / 发现页**：热门、正在上映、即将上映、高分榜单
 - **搜索**：电影与演员搜索
 - **详情页**：电影详情（演员、剧照、相似推荐）、演员详情
-- **按类型推荐**（本项目新增）：多选类型（最多 3 个）→ 走 TMDB `discover` 接口做多类型 **AND 过滤**（同时满足全部所选类型）→ 按评分人数排序 → 无限滚动加载
+- **类型榜单**（本项目新增）：多选类型（最多 3 个）→ TMDB `discover` 多类型 **AND 过滤** → **按加权评分（IMDb WR 公式）排序**，页面上会展示公式与参数（m / C / 候选数）
 
 ## 架构
 
 ```
-浏览器 / Nuxt 前端(3000)  →  Nitro 代理(3001, proxy/)  →  TMDB API
+浏览器  →  Nuxt 应用（单个部署：页面 + /tmdb 转发 + /ipx 图片优化）  →  TMDB API
 ```
 
-API Key 只存在于代理服务端的环境变量里，前端代码中不出现任何密钥。
+页面、数据接口、图片优化都由**同一个应用**提供（`server/routes/tmdb`、`server/routes/ipx`），
+因此线上只需一次部署、前后端同源无跨域；API Key 只存在于**服务端环境变量**，前端产物中不出现任何密钥。
+
+> 仓库里另有一个独立的 `proxy/` 服务（上游结构），需要"独立代理 + 前端"的双服务部署时才用得上。
 
 ## 本地运行
 
@@ -47,7 +56,7 @@ cp .env.example .env
 pnpm dev
 ```
 
-打开 <http://localhost:3000>；类型推荐入口 <http://localhost:3000/preferences>。
+打开 <http://localhost:3000>；类型榜单入口 <http://localhost:3000/preferences>。
 
 > **只需要一个终端**：TMDB 代理与图片优化都由应用自己的 server routes 提供
 > （`server/routes/tmdb/[...path].ts`、`server/routes/ipx/[...path].ts`），
@@ -77,21 +86,37 @@ pnpm build && pnpm start
 线上部署步骤见 **[docs/deploy-netlify.md](./docs/deploy-netlify.md)**（单站点，推荐）；
 如果想用"独立代理 + 前端"的双服务架构，见 [docs/deploy-vercel.md](./docs/deploy-vercel.md)。
 
+## 数据分析
+
+除了站点本身，仓库里还有一层对 TMDB 数据的分析（`analysis/`，Python + pandas + matplotlib）：
+
+- 采集 19 个类型的高票影片（**1201 部**），清洗后 **1190 部**进入分析
+- 核心发现：**票数与评分的相关系数仅 0.352**（票多 ≠ 分高）；**加权评分榜与纯票数榜的 Top20 只有 8 部重合**
+- 产出 6 张图表 + 分析报告：[docs/data-analysis.md](./docs/data-analysis.md)
+
+```bash
+python analysis/fetch_data.py   # 采集数据（TMDB API）
+python analysis/analyze.py      # 清洗、统计、出图
+```
+
 ## 我做了什么
 
 > 边界说明：页面结构、UI 组件、TMDB 请求封装、i18n 框架与代理服务骨架来自上游示例（见文末 Credits）。以下是在此基础上的改动，都标了代码位置，方便核对。
 
-### 1. 新增功能：按类型推荐（多选 → 组合查询 → 排序 → 无限滚动）
+### 1. 新增功能：类型榜单（多选 → 组合查询 → 加权评分排序）
 
-- `app/pages/preferences.vue`（75 行）：加载 TMDB 类型列表并网格多选，**上限 3 个**、**至少 2 个**才允许提交，选完跳转 `/recommend?genres=28|35&type=movie`
-- `app/pages/recommend.vue`（42 行）：按所选类型请求结果，无限滚动翻页
-- `app/composables/tmdb.ts`：`getMediaByGenre` 增加第 4 个参数 `sortBy`（默认 `popularity.desc`，不改变既有调用行为）
+- `app/pages/preferences.vue`：加载 TMDB 类型列表并网格多选，**上限 3 个**、**至少 2 个**才允许提交，跳转 `/recommend?genres=28,35&type=movie`
+- `app/pages/recommend.vue`：在 setup 顶层用 `useAsyncData` 取数，展示榜单并显示所用算法与参数
+- `server/api/recommend.get.ts`（新增）：榜单排序接口——先取 60 部高票候选池，再在服务端计算加权评分并整体重排
+- `app/composables/tmdb.ts`：新增 `getRankedRecommendations()`
 
 技术要点：
 
-- 多类型走 TMDB `discover` 接口的 `with_genres`，多个 id 用 **`,` 连接表示 AND**（`|` 是 OR）——即"选动作+喜剧"只会推同时属于这两类的影片
-- 结果按 `sort_by=vote_count.desc` 排序，避免小样本影片靠平均分刷到前面
-- 导航栏加入口，中英文文案补齐
+1. **多类型用 AND 语义**：TMDB `with_genres` 里多个 id 用 **`,` 连接表示 AND**（`|` 是 OR）——选"动作+喜剧"只会得到同时属于这两类的影片
+2. **加权评分排序**：TMDB 只支持单字段排序，用平均分会让"票很少的冷门高分片"霸榜、用票数又全是商业大片；因此采用 IMDb Top 250 的加权评分公式
+   `WR = (v / (v + m)) · R + (m / (v + m)) · C`（v 票数、R 平均分、m 最低票数门槛=500、C 候选池平均分）
+3. **服务端重排 + 缓存**：TMDB 不支持按 WR 排序，所以先取候选池（按票数取前 3 页 = 60 部以保证票数达标），再本地重排，结果缓存 1 小时
+4. **页面展示算法**：结果页直接显示公式与 `m`、`C`、候选数，排序逻辑对用户透明
 
 ### 2. 修复生产构建（开发模式正常、生产模式全站 500）
 
