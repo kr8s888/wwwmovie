@@ -57,5 +57,6 @@
   "All selected genres must match": "只推荐同时符合全部所选类型的影片",
   "No results for these genres": "没有同时符合这些类型的影片，试着去掉一个类型",
   "Ranked by weighted rating": "按加权评分排序（IMDb 公式）",
-  "Candidates": "候选影片："
+  "Candidates": "候选影片：",
+  "Personal project by {author}, built with Nuxt": "个人项目，由 {author} 用 Nuxt 构建"
 }

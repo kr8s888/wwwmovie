@@ -17,11 +17,12 @@ export default defineConfig({
     ['n-link-text', 'n-link underline'],
     ['n-tab', 'text-xl tracking-wide uppercase p3 border-b-2 border-transparent op20'],
     ['n-tab-active', 'border-current op100'],
-    ['border-base', 'border-gray-400/20'],
+    ['border-base', 'border-gray-400/15'],
   ],
   theme: {
     colors: {
-      primary: '#40c1ad',
+      // 影院感的琥珀金（上游原色为青绿 #40c1ad）
+      primary: '#e0a437',
     },
   },
   presets: [

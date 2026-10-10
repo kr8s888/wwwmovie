@@ -57,5 +57,6 @@
   "All selected genres must match": "Only titles matching all selected genres are shown",
   "No results for these genres": "No titles match all the selected genres - try removing one",
   "Ranked by weighted rating": "Ranked by weighted rating (IMDb formula)",
-  "Candidates": "candidates:"
+  "Candidates": "candidates:",
+  "Personal project by {author}, built with Nuxt": "Personal project by {author}, built with Nuxt"
 }

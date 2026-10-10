@@ -13,8 +13,7 @@ useHead(() => ({
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
     { name: 'description', content: 'wwwmovie —— 基于 Nuxt 的电影浏览与按类型推荐站点，数据来自 TMDB。' },
-    // TODO: 部署后换成你自己的域名，例如 https://wwwmovie.vercel.app/social-card.png
-    { property: 'og:image', content: 'https://wwwmovie.vercel.app/social-card.png' },
+    { property: 'og:image', content: 'https://wwwmovie-kr8s888.netlify.app/social-card.png' },
     { name: 'twitter:card', content: 'summary_large_image' },
   ],
   link: [
